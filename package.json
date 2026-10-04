@@ -1,0 +1,19 @@
+{
+  "name": "cremoriva-scroll-animation",
+  "version": "1.0.0",
+  "description": "Artisan luxury scroll-driven frame animation for CREMORIVA",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "canvas",
+    "scroll-animation",
+    "frame-by-frame",
+    "luxury",
+    "cremoriva"
+  ],
+  "author": "CREMORIVA",
+  "license": "ISC"
+}
