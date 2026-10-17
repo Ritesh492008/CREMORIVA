@@ -487,20 +487,343 @@
     if (grandtotalEl) grandtotalEl.textContent = `$${grandTotal.toFixed(2)}`;
   }
 
-  window.completeCheckout = function () {
+  let currentOrderData = null;
+
+  window.openCustomerDetailsModal = function () {
     if (cartItems.length === 0) {
-      showToast('Your cart is empty!');
+      showToast('Your Haute Cart is empty! Select an exquisite creation first.');
       return;
     }
-    const orderRef = '#CR-2026-' + Math.floor(1000 + Math.random() * 9000);
-    const refEl = document.getElementById('order-ref');
-    if (refEl) refEl.textContent = orderRef;
+
+    const previewList = document.getElementById('checkout-items-list');
+    const previewCount = document.getElementById('checkout-preview-count');
+    const previewTotal = document.getElementById('checkout-preview-total');
+
+    if (previewList) {
+      previewList.innerHTML = '';
+      let subtotal = 0;
+      let totalQty = 0;
+      cartItems.forEach(item => {
+        subtotal += item.price * item.qty;
+        totalQty += item.qty;
+        const row = document.createElement('div');
+        row.className = 'flex justify-between items-center py-1.5 border-b border-outline-variant/15 text-xs';
+        row.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+            <span class="font-serif text-on-surface font-medium">${item.title}</span>
+            <span class="text-secondary text-[11px] font-sans">× ${item.qty}</span>
+          </div>
+          <span class="font-serif font-bold text-primary">$${(item.price * item.qty).toFixed(2)}</span>
+        `;
+        previewList.appendChild(row);
+      });
+
+      const grandTotal = subtotal + 4.50;
+      if (previewCount) previewCount.textContent = `${totalQty} item${totalQty > 1 ? 's' : ''}`;
+      if (previewTotal) previewTotal.textContent = `$${grandTotal.toFixed(2)}`;
+    }
 
     window.closeCart();
-    const modal = document.getElementById('checkout-modal');
+    const modal = document.getElementById('customer-details-modal');
     if (modal) {
       modal.classList.remove('opacity-0', 'pointer-events-none');
       modal.classList.add('opacity-100');
+    }
+  };
+
+  window.closeCustomerDetailsModal = function () {
+    const modal = document.getElementById('customer-details-modal');
+    if (modal) {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100');
+    }
+  };
+
+  window.completeCheckout = function () {
+    window.openCustomerDetailsModal();
+  };
+
+  window.submitCustomerOrder = function (e) {
+    if (e && e.preventDefault) e.preventDefault();
+
+    if (cartItems.length === 0) {
+      showToast('Your Haute Cart is empty!');
+      return;
+    }
+
+    const nameInput = document.getElementById('cust-name');
+    const phoneInput = document.getElementById('cust-phone');
+    const emailInput = document.getElementById('cust-email');
+    const addressInput = document.getElementById('cust-address');
+    const deliveryTimeInput = document.getElementById('cust-delivery-time');
+    const notesInput = document.getElementById('cust-notes');
+    const submitBtn = document.getElementById('submit-order-btn');
+    const submitText = document.getElementById('submit-order-text');
+
+    const customerName = nameInput ? nameInput.value.trim() : 'Anonymous Client';
+    const customerPhone = phoneInput ? phoneInput.value.trim() : 'N/A';
+    const customerEmail = emailInput ? emailInput.value.trim() : 'N/A';
+    const customerAddress = addressInput ? addressInput.value.trim() : 'Salon Direct Collection';
+    const deliveryTime = deliveryTimeInput ? deliveryTimeInput.value : 'Express Cryo-Transit';
+    const customerNotes = notesInput ? notesInput.value.trim() : 'None';
+
+    if (!customerName || !customerPhone || !customerEmail || !customerAddress) {
+      showToast('Please fill all required coordinates.');
+      return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.textContent = 'Compiling Excel Manifest...';
+
+    const orderRef = '#CR-2026-' + Math.floor(1000 + Math.random() * 9000);
+    let subtotal = 0;
+    cartItems.forEach(item => {
+      subtotal += item.price * item.qty;
+    });
+    const dispatchFee = 4.50;
+    const grandTotal = subtotal + dispatchFee;
+
+    const orderData = {
+      orderRef: orderRef,
+      timestamp: new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+      isoDate: new Date().toISOString(),
+      customer: {
+        name: customerName,
+        phone: customerPhone,
+        email: customerEmail,
+        address: customerAddress,
+        deliveryTime: deliveryTime,
+        notes: customerNotes
+      },
+      items: cartItems.map(item => ({
+        title: item.title,
+        desc: item.desc || '',
+        price: item.price,
+        qty: item.qty,
+        total: (item.price * item.qty).toFixed(2)
+      })),
+      subtotal: subtotal.toFixed(2),
+      dispatch: dispatchFee.toFixed(2),
+      total: grandTotal.toFixed(2),
+      managerEmail: 'rahekrishn07@gmail.com'
+    };
+
+    currentOrderData = orderData;
+
+    // 1. Generate & Trigger Excel Download (.xlsx)
+    try {
+      generateOrderExcel(orderData);
+    } catch (err) {
+      console.warn('Excel generation fallback to CSV:', err);
+      downloadCSVOrder(orderData);
+    }
+
+    // 2. Transmit to serverless API / log for manager
+    try {
+      fetch('/api/order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+      }).catch(apiErr => console.log('API logging completed:', apiErr));
+    } catch (_) {}
+
+    // 3. Update Email & WhatsApp Manifest Links for Manager
+    const emailBtn = document.getElementById('email-manager-btn');
+    const whatsappBtn = document.getElementById('whatsapp-manager-btn');
+
+    const emailSubject = encodeURIComponent(`🍨 [CREMORIVA ORDER] ${orderRef} - ${customerName} ($${orderData.total})`);
+    const emailBody = encodeURIComponent(
+`CREMORIVA HAUTE GLACERIE & MOLECULAR CONFISERIE
+OFFICIAL ORDER MANIFEST & CLIENT DISPATCH RECORD
+=====================================================
+Order Reference: ${orderRef}
+Date & Time: ${orderData.timestamp}
+Status: CONFIRMED FOR CRYO-DISPATCH (-196°C)
+
+CUSTOMER COORDINATES:
+-----------------------------------------------------
+Name: ${customerName}
+Mobile / WhatsApp: ${customerPhone}
+Email: ${customerEmail}
+Delivery Address: ${customerAddress}
+Preferred Delivery Slot: ${deliveryTime}
+Special Notes / Inscriptions: ${customerNotes}
+
+ORDER ITEMS:
+-----------------------------------------------------
+${orderData.items.map((it, idx) => `${idx + 1}. ${it.title} × ${it.qty} = $${it.total} (Unit: $${Number(it.price).toFixed(2)})`).join('\n')}
+
+FINANCIAL BREAKDOWN:
+-----------------------------------------------------
+Subtotal: $${orderData.subtotal}
+Sub-Zero Cryo-Pod Insulation: Complimentary
+Courier Thermal Dispatch: $${orderData.dispatch}
+TOTAL DUE: $${orderData.total}
+Target Plating Temperature: -12.5°C
+=====================================================
+Official Excel Manifest (.xlsx) has been generated.
+Manager Recipient: rahekrishn07@gmail.com`
+    );
+
+    if (emailBtn) {
+      emailBtn.href = `mailto:rahekrishn07@gmail.com?subject=${emailSubject}&body=${emailBody}`;
+    }
+
+    const waText = encodeURIComponent(
+`🍨 *CREMORIVA ORDER MANIFEST - ${orderRef}*
+👤 *Client:* ${customerName}
+📞 *Mobile:* ${customerPhone}
+📧 *Email:* ${customerEmail}
+📍 *Address:* ${customerAddress}
+⏰ *Window:* ${deliveryTime}
+📝 *Notes:* ${customerNotes}
+───────────────────────
+*ORDER ITEMS:*
+${orderData.items.map((it, idx) => `${idx + 1}. *${it.title}* × ${it.qty} = $${it.total}`).join('\n')}
+───────────────────────
+*Subtotal:* $${orderData.subtotal}
+*Courier Thermal Dispatch:* $${orderData.dispatch}
+*TOTAL DUE:* $${orderData.total}
+───────────────────────
+📁 Official Excel spreadsheet dispatched for Manager: rahekrishn07@gmail.com`
+    );
+
+    if (whatsappBtn) {
+      whatsappBtn.href = `https://api.whatsapp.com/send?text=${waText}`;
+    }
+
+    // 4. Update Confirmation Modal State
+    const refEl = document.getElementById('order-ref');
+    const confirmNameEl = document.getElementById('confirm-cust-name');
+    const confirmTotalEl = document.getElementById('confirm-grand-total');
+
+    if (refEl) refEl.textContent = orderRef;
+    if (confirmNameEl) confirmNameEl.textContent = `${customerName} (${customerPhone})`;
+    if (confirmTotalEl) confirmTotalEl.textContent = `$${orderData.total}`;
+
+    // Reset button state
+    if (submitBtn) submitBtn.disabled = false;
+    if (submitText) submitText.textContent = 'Confirm & Transmit Order (Excel)';
+
+    // Close checkout details modal and open success confirmation modal
+    window.closeCustomerDetailsModal();
+    const successModal = document.getElementById('checkout-modal');
+    if (successModal) {
+      successModal.classList.remove('opacity-0', 'pointer-events-none');
+      successModal.classList.add('opacity-100');
+    }
+
+    // Reset cart
+    cartItems = [];
+    renderCart();
+    showToast(`Order confirmed! Excel manifest generated for ${customerName}`);
+  };
+
+  function generateOrderExcel(orderData) {
+    if (typeof XLSX !== 'undefined') {
+      const rows = [
+        ['CREMORIVA — HAUTE GLACERIE & MOLECULAR CONFISERIE'],
+        ['OFFICIAL ORDER MANIFEST & CLIENT DISPATCH RECORD'],
+        [''],
+        ['Order Reference:', orderData.orderRef],
+        ['Order Date & Time:', orderData.timestamp],
+        ['Cryogenic Protocol:', 'CONFIRMED (-196°C VACUUM SEALED)'],
+        ['Target Plating Temp:', '-12.5°C'],
+        ['Dispatched To Manager:', 'rahekrishn07@gmail.com'],
+        [''],
+        ['CUSTOMER COORDINATES'],
+        ['Customer Full Name:', orderData.customer.name],
+        ['Mobile / WhatsApp:', orderData.customer.phone],
+        ['Customer Email:', orderData.customer.email],
+        ['Delivery Coordinates:', orderData.customer.address],
+        ['Preferred Dispatch Window:', orderData.customer.deliveryTime],
+        ['Special Cryogenic Notes:', orderData.customer.notes],
+        [''],
+        ['ORDER LINE ITEMS'],
+        ['Line #', 'Creation Title', 'Formulation Details', 'Unit Price ($)', 'Quantity', 'Line Total ($)']
+      ];
+
+      orderData.items.forEach((item, idx) => {
+        rows.push([
+          idx + 1,
+          item.title,
+          item.desc,
+          `$${Number(item.price).toFixed(2)}`,
+          item.qty,
+          `$${item.total}`
+        ]);
+      });
+
+      rows.push(['']);
+      rows.push(['', '', '', '', 'Subtotal:', `$${orderData.subtotal}`]);
+      rows.push(['', '', '', '', 'Sub-Zero Cryo-Pod Capsule:', 'Complimentary']);
+      rows.push(['', '', '', '', 'Courier Thermal Dispatch:', `$${orderData.dispatch}`]);
+      rows.push(['', '', '', '', 'TOTAL DUE:', `$${orderData.total}`]);
+      rows.push(['']);
+      rows.push(['Manager Contact:', 'rahekrishn07@gmail.com']);
+      rows.push(['Notice:', 'All formulations conched under strict cryogenic molecular standards.']);
+
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      ws['!cols'] = [
+        { wch: 8 },
+        { wch: 32 },
+        { wch: 38 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 16 }
+      ];
+
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Order Manifest');
+      const filename = `CREMORIVA_Order_${orderData.orderRef.replace(/[^a-zA-Z0-9-]/g, '')}.xlsx`;
+      XLSX.writeFile(wb, filename);
+    } else {
+      downloadCSVOrder(orderData);
+    }
+  }
+
+  function downloadCSVOrder(orderData) {
+    let csvContent = 'data:text/csv;charset=utf-8,';
+    csvContent += 'CREMORIVA Haute Glacerie - Official Order Manifest\r\n';
+    csvContent += `Order Reference,${orderData.orderRef}\r\n`;
+    csvContent += `Date,${orderData.timestamp}\r\n`;
+    csvContent += `Manager Email,rahekrishn07@gmail.com\r\n`;
+    csvContent += `Customer Name,${orderData.customer.name}\r\n`;
+    csvContent += `Customer Phone,${orderData.customer.phone}\r\n`;
+    csvContent += `Customer Email,${orderData.customer.email}\r\n`;
+    csvContent += `Delivery Address,"${orderData.customer.address.replace(/"/g, '""')}"\r\n`;
+    csvContent += `Delivery Window,${orderData.customer.deliveryTime}\r\n`;
+    csvContent += `Special Notes,"${(orderData.customer.notes || '').replace(/"/g, '""')}"\r\n\r\n`;
+    csvContent += 'Line,Item,Description,Unit Price,Quantity,Total\r\n';
+
+    orderData.items.forEach((item, idx) => {
+      csvContent += `${idx + 1},"${item.title.replace(/"/g, '""')}","${(item.desc || '').replace(/"/g, '""')}",$${item.price},${item.qty},$${item.total}\r\n`;
+    });
+
+    csvContent += `,,,,Subtotal,$${orderData.subtotal}\r\n`;
+    csvContent += `,,,,Courier Thermal Dispatch,$${orderData.dispatch}\r\n`;
+    csvContent += `,,,,Total Payable,$${orderData.total}\r\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `CREMORIVA_Order_${orderData.orderRef.replace(/[^a-zA-Z0-9-]/g, '')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  window.downloadExcelAgain = function () {
+    if (currentOrderData) {
+      try {
+        generateOrderExcel(currentOrderData);
+        showToast('Downloaded official Excel manifest.');
+      } catch (err) {
+        downloadCSVOrder(currentOrderData);
+      }
+    } else {
+      showToast('No active order manifest found.');
     }
   };
 
@@ -510,9 +833,6 @@
       modal.classList.add('opacity-0', 'pointer-events-none');
       modal.classList.remove('opacity-100');
     }
-    // Reset cart on successful checkout
-    cartItems = [];
-    renderCart();
   };
 
   // =========================================================================
@@ -766,26 +1086,71 @@
   // =========================================================================
   // 9. MOBILE NAVIGATION DRAWER & SCROLL SPY
   // =========================================================================
+  window.toggleMobileMenu = function () {
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    const icon = document.getElementById('mobile-menu-icon');
+    if (!drawer) return;
+    const isHidden = drawer.classList.contains('hidden');
+    if (isHidden) {
+      drawer.classList.remove('hidden');
+      drawer.classList.add('flex');
+      if (backdrop) backdrop.classList.remove('hidden');
+      if (icon) icon.textContent = 'close';
+    } else {
+      drawer.classList.add('hidden');
+      drawer.classList.remove('flex');
+      if (backdrop) backdrop.classList.add('hidden');
+      if (icon) icon.textContent = 'menu';
+    }
+  };
+
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-  const mobileNavDrawer = document.getElementById('mobile-nav-drawer');
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
+  }
 
-  if (mobileMenuBtn && mobileNavDrawer) {
-    mobileMenuBtn.addEventListener('click', () => {
-      mobileNavDrawer.classList.toggle('hidden');
+  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      const backdrop = document.getElementById('mobile-nav-backdrop');
+      const icon = document.getElementById('mobile-menu-icon');
+      if (drawer) {
+        drawer.classList.add('hidden');
+        drawer.classList.remove('flex');
+      }
+      if (backdrop) backdrop.classList.add('hidden');
+      if (icon) icon.textContent = 'menu';
     });
+  });
 
-    document.querySelectorAll('.mobile-nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileNavDrawer.classList.add('hidden');
-      });
+  // Mobile Audio Ambiance Toggle Sync
+  const mobileAudioBtn = document.getElementById('mobile-audio-toggle');
+  const mobileAudioLabel = document.getElementById('mobile-audio-label');
+  if (mobileAudioBtn) {
+    mobileAudioBtn.addEventListener('click', () => {
+      const mainAudioToggle = document.getElementById('audio-toggle');
+      if (mainAudioToggle) mainAudioToggle.click();
+      if (mobileAudioLabel) {
+        mobileAudioLabel.textContent = isAudioActive ? 'Sound: On' : 'Sound: Off';
+      }
     });
   }
 
-  // Smooth Active Nav Scroll Spy
+  // Smooth Active Nav Scroll Spy & Scrolled Navbar Elevation
+  const mainHeader = document.getElementById('main-header');
   const sections = document.querySelectorAll('section[id], div[id="scroll-experience"]');
   const navLinks = document.querySelectorAll('#nav-menu a');
 
   window.addEventListener('scroll', () => {
+    if (mainHeader) {
+      if (window.scrollY > 40) {
+        mainHeader.classList.add('scrolled');
+      } else {
+        mainHeader.classList.remove('scrolled');
+      }
+    }
+
     let current = '';
     const scrollPosition = window.scrollY + 160;
 
@@ -800,9 +1165,9 @@
     navLinks.forEach(link => {
       const href = link.getAttribute('href').replace('#', '');
       if (href === current) {
-        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3.5 rounded-full text-primary bg-surface-container-high font-bold transition-all';
+        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-primary bg-surface-container-high font-bold transition-all';
       } else {
-        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all';
+        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all';
       }
     });
   }, { passive: true });

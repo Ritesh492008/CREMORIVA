@@ -13,6 +13,9 @@
 ## ✨ Features
 
 - **297-Frame Fluid Scroll Scrubber**: High-frequency canvas renderer displaying fluid chocolate and cream cascades synchronised to scroll velocity with adaptive prefetching and nearest-neighbor frame interpolation for zero-flicker performance.
+- **Haute Luxury Responsive Navbar**: Dynamic glassmorphic navbar with logo crest monogram, smooth-scrolling section links, real-time scroll spy, scroll elevation transitions, and an opulent mobile navigation drawer.
+- **Executive Excel Order Manifest System (.xlsx)**: Generates and downloads an official formatted Excel spreadsheet with full customer coordinates, itemized breakdown, line pricing, subtotal, and cryogenic plating requirements upon checkout.
+- **Manager Dispatch Protocol (`rahekrishn07@gmail.com`)**: Integrated with Vercel Serverless Function `/api/order`, direct Gmail mailto transmission, and formatted mobile WhatsApp dispatch to salon management.
 - **Web Audio Generative Ambiance**: Synthesizer creating a velvety sonic background using multi-oscillator pink noise, resonant lowpass filters, and warm harmonic hums.
 - **AURA AI Sommelier**: Interactive pairing recommendation engine matching mood, notes, and occasion to bespoke degustation flights.
 - **Bespoke Atelier Configurator**: Interactive customizer allowing real-time adjustment of chocolate bases, cryo-infusions (-196°C freeze-dried botanicals, 24K gold flakes), and velvet temperature controls.
