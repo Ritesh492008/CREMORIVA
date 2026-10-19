@@ -11,9 +11,10 @@
   // 1. CONFIGURATION & STATE
   // =========================================================================
   const TOTAL_FRAMES = 297;
-  const FRAME_DIR_PRIMARY = './background-animation.agignore/';
-  const FRAME_DIR_FALLBACK = './background-animation/';
+  const FRAME_DIR_PRIMARY = '/background-animation/';
+  const FRAME_DIR_FALLBACK = '/background-animation/';
   let activeFrameDir = FRAME_DIR_PRIMARY;
+
   const FRAME_PREFIX = 'ezgif-frame-';
   const FRAME_EXT = '.jpg';
 
@@ -626,7 +627,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderData)
       }).catch(apiErr => console.log('API logging completed:', apiErr));
-    } catch (_) {}
+    } catch (_) { }
 
     // 3. Update Email & WhatsApp Manifest Links for Manager
     const emailBtn = document.getElementById('email-manager-btn');
@@ -634,7 +635,7 @@
 
     const emailSubject = encodeURIComponent(`🍨 [CREMORIVA ORDER] ${orderRef} - ${customerName} ($${orderData.total})`);
     const emailBody = encodeURIComponent(
-`CREMORIVA HAUTE GLACERIE & MOLECULAR CONFISERIE
+      `CREMORIVA HAUTE GLACERIE & MOLECULAR CONFISERIE
 OFFICIAL ORDER MANIFEST & CLIENT DISPATCH RECORD
 =====================================================
 Order Reference: ${orderRef}
@@ -671,7 +672,7 @@ Manager Recipient: rahekrishn07@gmail.com`
     }
 
     const waText = encodeURIComponent(
-`🍨 *CREMORIVA ORDER MANIFEST - ${orderRef}*
+      `🍨 *CREMORIVA ORDER MANIFEST - ${orderRef}*
 👤 *Client:* ${customerName}
 📞 *Mobile:* ${customerPhone}
 📧 *Email:* ${customerEmail}
