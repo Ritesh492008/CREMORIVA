@@ -311,30 +311,7 @@ a {
   gap: 32px;
 }
 
-.nav-link {
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  position: relative;
-  padding: 6px 0;
-}
-
-.nav-link:hover, .nav-link.active {
-  color: var(--cream-pure);
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gold-light);
-  border-radius: 2px;
-  box-shadow: 0 0 8px var(--gold-primary);
-}
+/* Legacy nav-link definitions unified in section below */
 
 .nav-actions {
   display: flex;
@@ -1447,30 +1424,127 @@ a {
 }
 
 /* ==========================================================================
-   PROPER NAVBAR DYNAMICS & SCROLL OFFSET
+   PROPER NAVBAR DYNAMICS, LUXURY HOVER & ACTIVE LOCATIONS
    ========================================================================== */
 section[id], div[id="scroll-experience"] {
   scroll-margin-top: 5.5rem;
 }
 
 #main-header {
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 #main-header.scrolled > div {
-  height: 4.25rem;
-  background-color: rgba(22, 12, 9, 0.94);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(229, 169, 98, 0.18);
-  border-color: rgba(229, 169, 98, 0.35);
+  height: 4.5rem;
+  background-color: rgba(18, 11, 9, 0.94);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 25px rgba(229, 169, 98, 0.16);
+  border-color: rgba(229, 169, 98, 0.32);
 }
 
+/* Desktop Navbar Menu Container */
+#nav-menu {
+  display: flex;
+  align-items: center;
+  background: rgba(27, 17, 14, 0.65);
+  padding: 4px 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(80, 69, 57, 0.35);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Individual Nav Menu Link - Professional Luxury Default State */
 .nav-link {
   position: relative;
-  transition: all 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.45rem 0.85rem;
+  border-radius: 9999px;
+  color: rgba(244, 222, 216, 0.72);
+  background: transparent;
+  border: 1px solid transparent;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.22s ease, background-color 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease, text-shadow 0.22s ease;
+  user-select: none;
 }
 
+/* Pure Pointer Hover State: ONLY activates when user actually hovers mouse over that specific button */
 .nav-link:hover {
-  text-shadow: 0 0 10px rgba(229, 169, 98, 0.4);
+  color: #ffc684;
+  background-color: rgba(229, 169, 98, 0.12);
+  border-color: rgba(229, 169, 98, 0.25);
+  text-shadow: 0 0 10px rgba(229, 169, 98, 0.45);
+}
+
+/* Active State: Applied ONLY when clicked or when user is at that location */
+.nav-link.active {
+  color: #ffc684;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(229, 169, 98, 0.24) 0%, rgba(107, 62, 27, 0.38) 100%);
+  border-color: rgba(255, 198, 132, 0.48);
+  box-shadow: 0 2px 14px rgba(229, 169, 98, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  text-shadow: 0 0 12px rgba(229, 169, 98, 0.5);
+}
+
+/* Elegant micro-sparkle indicator for active menu item */
+.nav-link.active::before {
+  content: '✦';
+  font-size: 0.55rem;
+  margin-right: 0.35rem;
+  color: #ffc684;
+  line-height: 1;
+  animation: pulse-glow 2s infinite alternate ease-in-out;
+}
+
+/* Mobile Navigation Drawer Links */
+.mobile-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.72rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(244, 222, 216, 0.75);
+  background: rgba(41, 29, 25, 0.55);
+  border: 1px solid rgba(80, 69, 57, 0.35);
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav-link:hover {
+  color: #ffc684;
+  background: rgba(229, 169, 98, 0.12);
+  border-color: rgba(229, 169, 98, 0.3);
+}
+
+.mobile-nav-link.active {
+  color: #ffc684;
+  font-weight: 700;
+  background: linear-gradient(90deg, rgba(229, 169, 98, 0.22) 0%, rgba(107, 62, 27, 0.38) 100%);
+  border-color: rgba(255, 198, 132, 0.55);
+  box-shadow: 0 0 18px rgba(229, 169, 98, 0.22);
+}
+
+.mobile-nav-link .nav-indicator {
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.mobile-nav-link.active .nav-indicator {
+  color: #ffc684;
+  transform: scale(1.15);
 }
 
 /* Custom scrollbars for modal and cart */

@@ -95,7 +95,7 @@ CREMORIVA/
 ├── DESIGN.md                      # Haute Patisserie design system tokens & specs
 ├── LICENSE                        # ISC License
 ├── .gitignore                     # Git ignore rules for node, vercel & OS artifacts
-└── background-animation.agignore/ # 297 ultra-high-definition sequence frames (001-297)
+└── background-animation/          # 297 ultra-high-definition sequence frames (001-297)
 ```
 
 ---

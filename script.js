@@ -1111,66 +1111,156 @@ ${orderData.items.map((it, idx) => `${idx + 1}. *${it.title}* × ${it.qty} = $${
     mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
   }
 
-  document.querySelectorAll('.mobile-nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-      const drawer = document.getElementById('mobile-nav-drawer');
-      const backdrop = document.getElementById('mobile-nav-backdrop');
-      const icon = document.getElementById('mobile-menu-icon');
-      if (drawer) {
-        drawer.classList.add('hidden');
-        drawer.classList.remove('flex');
-      }
-      if (backdrop) backdrop.classList.add('hidden');
-      if (icon) icon.textContent = 'menu';
-    });
-  });
+  // =========================================================================
+  // 9. PROFESSIONAL LUXURY NAVBAR DYNAMICS & LOCATION SPY
+  // =========================================================================
+  const mainHeader = document.getElementById('main-header');
+  const desktopNavLinks = document.querySelectorAll('#nav-menu .nav-link');
+  const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
 
-  // Mobile Audio Ambiance Toggle Sync
-  const mobileAudioBtn = document.getElementById('mobile-audio-toggle');
-  const mobileAudioLabel = document.getElementById('mobile-audio-label');
-  if (mobileAudioBtn) {
-    mobileAudioBtn.addEventListener('click', () => {
-      const mainAudioToggle = document.getElementById('audio-toggle');
-      if (mainAudioToggle) mainAudioToggle.click();
-      if (mobileAudioLabel) {
-        mobileAudioLabel.textContent = isAudioActive ? 'Sound: On' : 'Sound: Off';
+  let activeSectionId = 'scroll-experience';
+  let isNavClickScrolling = false;
+  let navScrollTimeout = null;
+
+  function getElementDocumentTop(el) {
+    if (!el) return 0;
+    const rect = el.getBoundingClientRect();
+    return rect.top + window.scrollY;
+  }
+
+  function setActiveNav(targetId) {
+    if (activeSectionId === targetId) return;
+    activeSectionId = targetId;
+
+    desktopNavLinks.forEach(link => {
+      const href = (link.getAttribute('href') || '').replace('#', '');
+      if (href === targetId) {
+        link.classList.add('active');
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.classList.remove('active');
+        link.removeAttribute('aria-current');
+      }
+    });
+
+    mobileNavLinks.forEach(link => {
+      const href = (link.getAttribute('href') || '').replace('#', '');
+      if (href === targetId) {
+        link.classList.add('active');
+        link.setAttribute('aria-current', 'page');
+      } else {
+        link.classList.remove('active');
+        link.removeAttribute('aria-current');
       }
     });
   }
 
-  // Smooth Active Nav Scroll Spy & Scrolled Navbar Elevation
-  const mainHeader = document.getElementById('main-header');
-  const sections = document.querySelectorAll('section[id], div[id="scroll-experience"]');
-  const navLinks = document.querySelectorAll('#nav-menu a');
+  function computeActiveSection() {
+    if (isNavClickScrolling) return;
 
+    const scrollY = window.scrollY;
+    const windowH = window.innerHeight;
+    const docH = document.documentElement.scrollHeight;
+
+    // 1. If reached bottom of document, activate the final section
+    if (scrollY + windowH >= docH - 60) {
+      setActiveNav('bespoke-atelier');
+      return;
+    }
+
+    // 2. While scrolling within the 3D frame animation wrapper, lock to Cascade 3D ONLY
+    const scrollExp = document.getElementById('scroll-experience');
+    if (scrollExp) {
+      const expTop = getElementDocumentTop(scrollExp);
+      const expBottom = expTop + scrollExp.offsetHeight;
+      if (scrollY + 160 < expBottom) {
+        setActiveNav('scroll-experience');
+        return;
+      }
+    }
+
+    // 3. For content sections following the animation, scan bottom-to-top with header offset
+    const sectionsToCheck = ['bespoke-atelier', 'craft-science', 'creations-vault', 'aura-sommelier', 'tasting-flight'];
+    const threshold = scrollY + 180;
+
+    for (const secId of sectionsToCheck) {
+      const secEl = document.getElementById(secId);
+      if (secEl) {
+        const secTop = getElementDocumentTop(secEl);
+        if (threshold >= secTop) {
+          setActiveNav(secId);
+          return;
+        }
+      }
+    }
+
+    setActiveNav('scroll-experience');
+  }
+
+  // Smooth click scroll navigation with exact fixed header clearance
+  function handleNavClick(e, targetId) {
+    const targetEl = document.getElementById(targetId);
+    if (!targetEl) return;
+
+    e.preventDefault();
+    isNavClickScrolling = true;
+    setActiveNav(targetId);
+
+    if (targetId === 'scroll-experience') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      const headerOffset = 84;
+      const targetDocTop = getElementDocumentTop(targetEl);
+      window.scrollTo({
+        top: Math.max(0, targetDocTop - headerOffset),
+        behavior: 'smooth'
+      });
+    }
+
+    // Close mobile navigation drawer if open
+    const drawer = document.getElementById('mobile-nav-drawer');
+    const backdrop = document.getElementById('mobile-nav-backdrop');
+    const icon = document.getElementById('mobile-menu-icon');
+    if (drawer && !drawer.classList.contains('hidden')) {
+      drawer.classList.add('hidden');
+      drawer.classList.remove('flex');
+    }
+    if (backdrop && !backdrop.classList.contains('hidden')) {
+      backdrop.classList.add('hidden');
+    }
+    if (icon) icon.textContent = 'menu';
+
+    clearTimeout(navScrollTimeout);
+    navScrollTimeout = setTimeout(() => {
+      isNavClickScrolling = false;
+      computeActiveSection();
+    }, 900);
+  }
+
+  desktopNavLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const targetId = (link.getAttribute('href') || '').replace('#', '');
+      handleNavClick(e, targetId);
+    });
+  });
+
+  mobileNavLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      const targetId = (link.getAttribute('href') || '').replace('#', '');
+      handleNavClick(e, targetId);
+    });
+  });
+
+  // Window scroll event listener for navbar elevation and accurate location detection
   window.addEventListener('scroll', () => {
     if (mainHeader) {
-      if (window.scrollY > 40) {
+      if (window.scrollY > 30) {
         mainHeader.classList.add('scrolled');
       } else {
         mainHeader.classList.remove('scrolled');
       }
     }
-
-    let current = '';
-    const scrollPosition = window.scrollY + 160;
-
-    sections.forEach(section => {
-      const top = section.offsetTop;
-      const height = section.offsetHeight;
-      if (scrollPosition >= top && scrollPosition < top + height) {
-        current = section.getAttribute('id');
-      }
-    });
-
-    navLinks.forEach(link => {
-      const href = link.getAttribute('href').replace('#', '');
-      if (href === current) {
-        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-primary bg-surface-container-high font-bold transition-all';
-      } else {
-        link.className = 'nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all';
-      }
-    });
+    computeActiveSection();
   }, { passive: true });
 
   // =========================================================================
@@ -1182,4 +1272,5 @@ ${orderData.items.map((it, idx) => `${idx + 1}. *${it.title}* × ${it.qty} = $${
   animationLoop();
   renderCart();
   window.calculateBespokeTotal();
+  computeActiveSection();
 })();

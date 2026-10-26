@@ -154,13 +154,13 @@
       </a>
 
       <!-- DESKTOP / TABLET NAVIGATION (Visible lg+) -->
-      <nav class="hidden lg:flex items-center gap-1 xl:gap-2" id="nav-menu">
-        <a href="#scroll-experience" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-primary bg-surface-container-high font-bold transition-all">Cascade 3D</a>
-        <a href="#tasting-flight" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">Degustation</a>
-        <a href="#aura-sommelier" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">AI Sommelier</a>
-        <a href="#creations-vault" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">Vault Menu</a>
-        <a href="#craft-science" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">The Science</a>
-        <a href="#bespoke-atelier" class="nav-link text-xs font-semibold uppercase tracking-wider py-2 px-3 xl:px-3.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-all">Atelier</a>
+      <nav class="hidden lg:flex items-center gap-1 xl:gap-1.5" id="nav-menu" aria-label="Main Navigation">
+        <a href="#scroll-experience" class="nav-link active" data-nav="scroll-experience">Cascade 3D</a>
+        <a href="#tasting-flight" class="nav-link" data-nav="tasting-flight">Degustation</a>
+        <a href="#aura-sommelier" class="nav-link" data-nav="aura-sommelier">AI Sommelier</a>
+        <a href="#creations-vault" class="nav-link" data-nav="creations-vault">Vault Menu</a>
+        <a href="#craft-science" class="nav-link" data-nav="craft-science">The Science</a>
+        <a href="#bespoke-atelier" class="nav-link" data-nav="bespoke-atelier">Atelier</a>
       </nav>
 
       <!-- ACTIONS CLUSTER -->
@@ -214,30 +214,30 @@
           <span class="material-symbols-outlined text-[18px]">close</span>
         </button>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-        <a href="#scroll-experience" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-primary bg-surface-container-high">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5" id="mobile-nav-links">
+        <a href="#scroll-experience" class="mobile-nav-link active" data-nav="scroll-experience">
           <span>The Living Cascade 3D</span>
-          <span class="text-primary text-xs">✦</span>
+          <span class="nav-indicator text-primary text-xs">✦</span>
         </a>
-        <a href="#tasting-flight" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high">
+        <a href="#tasting-flight" class="mobile-nav-link" data-nav="tasting-flight">
           <span>Degustation Flights</span>
-          <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+          <span class="nav-indicator material-symbols-outlined text-[14px]">arrow_forward</span>
         </a>
-        <a href="#aura-sommelier" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high">
+        <a href="#aura-sommelier" class="mobile-nav-link" data-nav="aura-sommelier">
           <span>AI Sommelier AURA</span>
-          <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+          <span class="nav-indicator material-symbols-outlined text-[14px]">auto_awesome</span>
         </a>
-        <a href="#creations-vault" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high">
+        <a href="#creations-vault" class="mobile-nav-link" data-nav="creations-vault">
           <span>Vault Creations</span>
-          <span class="material-symbols-outlined text-[14px]">menu_book</span>
+          <span class="nav-indicator material-symbols-outlined text-[14px]">menu_book</span>
         </a>
-        <a href="#craft-science" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high">
+        <a href="#craft-science" class="mobile-nav-link" data-nav="craft-science">
           <span>The Molecular Science</span>
-          <span class="material-symbols-outlined text-[14px]">science</span>
+          <span class="nav-indicator material-symbols-outlined text-[14px]">science</span>
         </a>
-        <a href="#bespoke-atelier" class="mobile-nav-link flex items-center justify-between text-xs font-semibold tracking-wider py-2.5 px-3.5 rounded-xl text-on-surface-variant hover:text-primary hover:bg-surface-container-high">
+        <a href="#bespoke-atelier" class="mobile-nav-link" data-nav="bespoke-atelier">
           <span>Custom Atelier</span>
-          <span class="material-symbols-outlined text-[14px]">tune</span>
+          <span class="nav-indicator material-symbols-outlined text-[14px]">tune</span>
         </a>
       </div>
       

@@ -4,8 +4,8 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/background-animation/:path*",
-      "destination": "/background-animation.agignore/:path*"
+      "source": "/background-animation.agignore/:path*",
+      "destination": "/background-animation/:path*"
     }
   ],
   "headers": [
