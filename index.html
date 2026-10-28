@@ -116,15 +116,15 @@
   <!-- =========================================================================
        HAUTE LUXURY RESPONSIVE NAVBAR
        ========================================================================= -->
-  <header class="fixed top-0 left-0 right-0 z-50 px-3 md:px-6 pt-3 transition-all duration-300" id="main-header">
-    <div class="h-20 w-full max-w-7xl mx-auto rounded-2xl bg-surface-container-lowest/85 backdrop-blur-2xl border border-outline-variant/30 shadow-[0_20px_50px_rgba(0,0,0,0.65),0_0_30px_rgba(229,169,98,0.12)] flex items-center justify-between px-3 sm:px-4 lg:px-6 transition-all duration-300">
+  <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 md:px-6 pt-2.5 sm:pt-3 transition-all duration-300" id="main-header">
+    <div class="h-16 sm:h-20 w-full max-w-7xl mx-auto rounded-2xl bg-surface-container-lowest/85 backdrop-blur-2xl border border-outline-variant/30 shadow-[0_20px_50px_rgba(0,0,0,0.65),0_0_30px_rgba(229,169,98,0.12)] flex items-center justify-between px-3 sm:px-4 lg:px-6 transition-all duration-300">
       
       <!-- BRAND VECTOR EMBLEM LOGO -->
-      <a href="#scroll-experience" class="flex items-center gap-2.5 sm:gap-3 group shrink-0" aria-label="CREMORIVA Home - Return to Cascade Top">
+      <a href="#scroll-experience" class="flex items-center gap-2 sm:gap-3 group shrink-0" aria-label="CREMORIVA Home - Return to Cascade Top">
         <!-- Golden Monogram Crest SVG -->
-        <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-primary via-primary-container to-secondary flex items-center justify-center p-[1.5px] shadow-[0_0_22px_rgba(229,169,98,0.45)] group-hover:scale-105 transition-transform duration-300 shrink-0">
+        <div class="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-primary via-primary-container to-secondary flex items-center justify-center p-[1.5px] shadow-[0_0_22px_rgba(229,169,98,0.45)] group-hover:scale-105 transition-transform duration-300 shrink-0">
           <div class="w-full h-full rounded-full bg-surface-container-lowest flex items-center justify-center">
-            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-primary" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg class="w-4 h-4 sm:w-6 sm:h-6 text-primary" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 3L21.5 7.5L26 9L21.5 10.5L20 15L18.5 10.5L14 9L18.5 7.5L20 3Z" fill="#ffc684"/>
               <path d="M10 16C10 16 12 25 20 25C28 25 30 16 30 16C28 19 25 21 20 21C15 21 12 19 10 16Z" fill="url(#gold-grad-1)"/>
               <path d="M20 12C20 12 24 16 24 19C24 21.2 22.2 23 20 23C17.8 23 16 21.2 16 19C16 16 20 12 20 12Z" fill="url(#gold-grad-2)"/>
@@ -145,16 +145,16 @@
         </div>
         <!-- Logo Wordmark -->
         <div class="flex flex-col">
-          <div class="flex items-center gap-1.5">
-            <span class="font-serif text-[18px] sm:text-[22px] font-bold tracking-[0.16em] sm:tracking-[0.18em] leading-none text-on-surface group-hover:text-primary transition-colors">CREMORIVA</span>
+          <div class="flex items-center gap-1 sm:gap-1.5">
+            <span class="font-serif text-[17px] sm:text-[22px] font-bold tracking-[0.14em] sm:tracking-[0.18em] leading-none text-on-surface group-hover:text-primary transition-colors">CREMORIVA</span>
             <span class="text-primary text-[10px] sm:text-xs animate-pulse">✦</span>
           </div>
-          <span class="font-sans text-[8px] sm:text-[10px] font-bold tracking-[0.3em] text-secondary uppercase mt-0.5">Haute Glacerie • Paris</span>
+          <span class="font-sans text-[7.5px] sm:text-[10px] font-bold tracking-[0.25em] sm:tracking-[0.3em] text-secondary uppercase mt-0.5">Haute Glacerie • Paris</span>
         </div>
       </a>
 
       <!-- DESKTOP / TABLET NAVIGATION (Visible lg+) -->
-      <nav class="hidden lg:flex items-center gap-1 xl:gap-1.5" id="nav-menu" aria-label="Main Navigation">
+      <nav class="hidden lg:flex items-center gap-0.5 xl:gap-1.5 shrink-0" id="nav-menu" aria-label="Main Navigation">
         <a href="#scroll-experience" class="nav-link active" data-nav="scroll-experience">Cascade 3D</a>
         <a href="#tasting-flight" class="nav-link" data-nav="tasting-flight">Degustation</a>
         <a href="#aura-sommelier" class="nav-link" data-nav="aura-sommelier">AI Sommelier</a>
@@ -164,36 +164,27 @@
       </nav>
 
       <!-- ACTIONS CLUSTER -->
-      <div class="flex items-center gap-2 sm:gap-2.5">
+      <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
         <!-- Velvet Sound Ambiance Toggle -->
-        <button id="audio-toggle" class="hidden sm:inline-flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-surface-container-high/60 hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant hover:text-primary transition-all text-xs" title="Toggle Velvet Sound Ambiance">
+        <button id="audio-toggle" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full bg-surface-container-high/60 hover:bg-surface-container-highest border border-outline-variant/30 text-on-surface-variant hover:text-primary transition-all text-xs" title="Toggle Velvet Sound Ambiance">
           <span class="audio-waves flex items-end gap-[2px] h-3" aria-hidden="true">
             <span class="bar bar-1"></span>
             <span class="bar bar-2"></span>
             <span class="bar bar-3"></span>
             <span class="bar bar-4"></span>
           </span>
-          <span class="font-sans text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider" id="audio-state">Sound: Mute</span>
+          <span class="hidden md:inline font-sans text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider" id="audio-state">Sound: Mute</span>
         </button>
 
-        <!-- AI Sommelier Live Status Pill -->
-        <a href="#aura-sommelier" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-high/60 border border-outline-variant/30 hover:border-primary/50 transition-colors" title="Consult AI Sommelier AURA">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
-          </span>
-          <span class="font-sans text-[11px] uppercase tracking-wider text-secondary font-semibold">AI Sommelier</span>
-        </a>
-
         <!-- Order Now Button (Opens Slide-over Cart) -->
-        <button onclick="openCart()" class="relative inline-flex items-center justify-center px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-full font-sans text-xs sm:text-sm font-bold tracking-wider uppercase text-on-primary bg-gradient-to-r from-primary via-primary-container to-secondary shadow-[0_0_20px_rgba(229,169,98,0.35)] hover:shadow-[0_0_25px_rgba(229,169,98,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300">
-          <span class="material-symbols-outlined text-[16px] sm:text-[18px] mr-1">shopping_bag</span>
+        <button onclick="openCart()" class="relative inline-flex items-center justify-center px-3 py-1.5 sm:px-5 sm:py-2.5 rounded-full font-sans text-[11px] sm:text-xs font-bold tracking-wider uppercase text-on-primary bg-gradient-to-r from-primary via-primary-container to-secondary shadow-[0_0_20px_rgba(229,169,98,0.35)] hover:shadow-[0_0_25px_rgba(229,169,98,0.55)] hover:scale-[1.03] active:scale-[0.98] transition-all duration-300">
+          <span class="material-symbols-outlined text-[15px] sm:text-[18px] mr-1">shopping_bag</span>
           <span>Order Now</span>
         </button>
 
         <!-- Cart Button with Dynamic Badge -->
         <button onclick="openCart()" aria-label="Open Haute Cart" class="relative p-2 rounded-full bg-surface-container-high/70 hover:bg-surface-container-highest text-on-surface hover:text-primary transition-colors">
-          <span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+          <span class="material-symbols-outlined text-[19px] sm:text-[20px]">shopping_cart</span>
           <span id="cart-badge-count" class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-on-primary font-bold shadow-md">1</span>
         </button>
 
@@ -266,6 +257,9 @@
     <!-- Pinned Sticky Stage -->
     <div class="sticky-stage" id="sticky-stage">
       
+      <!-- High-Resolution Instant Initial Poster (Eliminates Blank Screen on Initial Load) -->
+      <img id="animation-poster" src="background-animation/ezgif-frame-001.jpg" alt="CREMORIVA Living Cascade 3D" class="animation-poster" />
+
       <!-- High-DPI Canvas Element -->
       <canvas id="animation-canvas" class="animation-canvas" width="1280" height="720"></canvas>
       

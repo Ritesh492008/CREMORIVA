@@ -11,9 +11,15 @@
   // 1. CONFIGURATION & STATE
   // =========================================================================
   const TOTAL_FRAMES = 297;
-  const FRAME_DIR_PRIMARY = '/background-animation/';
-  const FRAME_DIR_FALLBACK = '/background-animation/';
-  let activeFrameDir = FRAME_DIR_PRIMARY;
+  const CANDIDATE_FRAME_DIRS = [
+    'background-animation/',
+    './background-animation/',
+    '/background-animation/',
+    './background-animation.agignore/',
+    '/background-animation.agignore/'
+  ];
+  let activeFrameDir = 'background-animation/';
+  let isPathResolved = false;
 
   const FRAME_PREFIX = 'ezgif-frame-';
   const FRAME_EXT = '.jpg';
@@ -22,15 +28,17 @@
   const canvas = document.getElementById('animation-canvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d', { alpha: false });
+  const initialPoster = document.getElementById('animation-poster');
   const scrollWrapper = document.getElementById('scroll-experience');
   const heroOverlay = document.getElementById('hero-overlay');
   const heroScrollIndicator = document.getElementById('hero-scroll-indicator');
   const storyCards = document.querySelectorAll('.story-card');
   const chapterDots = document.querySelectorAll('.dot-item');
 
-  // Animation Frame Buffers
+  // Animation Frame Buffers & State
   const images = new Array(TOTAL_FRAMES);
   const loadedFlags = new Array(TOTAL_FRAMES).fill(false);
+  const inFlightFlags = new Array(TOTAL_FRAMES).fill(false);
   let loadedCount = 0;
   let targetFrame = 1;
   let currentFrame = 1;
@@ -54,7 +62,7 @@
   ];
 
   // =========================================================================
-  // 2. 297-FRAME SCROLL ANIMATION SCRUBBER ENGINE
+  // 2. INDUSTRIAL-GRADE FRAME SCRUBBER & NETWORK RESILIENT LOADER
   // =========================================================================
   function formatFrameNumber(num) {
     return String(num).padStart(3, '0');
@@ -64,54 +72,179 @@
     return `${dir}${FRAME_PREFIX}${formatFrameNumber(index)}${FRAME_EXT}`;
   }
 
-  function initFramePreloader() {
-    const initialReadyThreshold = 20;
+  function hideInitialPoster() {
+    if (initialPoster && !initialPoster.classList.contains('loaded')) {
+      initialPoster.classList.add('loaded');
+      setTimeout(() => {
+        initialPoster.style.display = 'none';
+      }, 550);
+    }
+  }
 
-    function onSingleFrameLoaded(index) {
-      loadedFlags[index - 1] = true;
-      loadedCount++;
+  // Controlled Concurrency Priority Download Queue (Avoids Vercel/Browser Network Starvation)
+  const downloadQueue = [];
+  const queuedSet = new Set();
+  const MAX_CONCURRENT_DOWNLOADS = 4;
+  let activeDownloads = 0;
 
-      // Sharpen current frame immediately once downloaded
-      if (Math.round(currentFrame) === index) {
-        lastDrawnFrame = -1;
-        renderCanvasFrame(index);
+  function enqueueFrame(index, highPriority = false) {
+    if (index < 1 || index > TOTAL_FRAMES) return;
+    if (loadedFlags[index - 1] || inFlightFlags[index - 1]) return;
+
+    if (queuedSet.has(index)) {
+      if (highPriority) {
+        const existingIdx = downloadQueue.indexOf(index);
+        if (existingIdx > -1) {
+          downloadQueue.splice(existingIdx, 1);
+          downloadQueue.unshift(index);
+        }
       }
-
-      // Ensure frame 1 displays instantly
-      if (index === 1 && lastDrawnFrame === -1) {
-        renderCanvasFrame(1);
-      }
+      return;
     }
 
-    function loadFrame(i) {
-      const img = new Image();
-      img.onload = () => onSingleFrameLoaded(i);
-      img.onerror = () => {
-        // Transparent fallback to alternate folder
-        const altDir = activeFrameDir === FRAME_DIR_PRIMARY ? FRAME_DIR_FALLBACK : FRAME_DIR_PRIMARY;
-        const fallbackImg = new Image();
-        fallbackImg.onload = () => {
-          activeFrameDir = altDir;
-          images[i - 1] = fallbackImg;
-          onSingleFrameLoaded(i);
-        };
-        fallbackImg.src = getFrameSrc(i, altDir);
-      };
-      img.src = getFrameSrc(i, activeFrameDir);
+    queuedSet.add(index);
+    if (highPriority) {
+      downloadQueue.unshift(index);
+    } else {
+      downloadQueue.push(index);
+    }
+    processDownloadQueue();
+  }
+
+  function processDownloadQueue() {
+    while (activeDownloads < MAX_CONCURRENT_DOWNLOADS && downloadQueue.length > 0) {
+      const nextIndex = downloadQueue.shift();
+      queuedSet.delete(nextIndex);
+      if (!loadedFlags[nextIndex - 1] && !inFlightFlags[nextIndex - 1]) {
+        downloadSingleFrame(nextIndex);
+      }
+    }
+  }
+
+  function downloadSingleFrame(i) {
+    inFlightFlags[i - 1] = true;
+    activeDownloads++;
+
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+
+    img.onload = () => {
+      inFlightFlags[i - 1] = false;
+      loadedFlags[i - 1] = true;
       images[i - 1] = img;
-    }
+      loadedCount++;
+      activeDownloads--;
 
-    // Load initial 20 frames immediately
-    for (let i = 1; i <= Math.min(initialReadyThreshold, TOTAL_FRAMES); i++) {
-      loadFrame(i);
-    }
-
-    // Stream remaining frames in background
-    setTimeout(() => {
-      for (let i = initialReadyThreshold + 1; i <= TOTAL_FRAMES; i++) {
-        loadFrame(i);
+      // If frame 1 or current target frame, render immediately
+      if (i === 1 || Math.round(currentFrame) === i) {
+        lastDrawnFrame = -1;
+        renderCanvasFrame(Math.round(currentFrame));
       }
-    }, 40);
+
+      processDownloadQueue();
+    };
+
+    img.onerror = () => {
+      inFlightFlags[i - 1] = false;
+      activeDownloads--;
+
+      // Attempt fallback directory probing if path resolution is pending
+      if (!isPathResolved) {
+        tryAlternatePath(i);
+      } else {
+        processDownloadQueue();
+      }
+    };
+
+    img.src = getFrameSrc(i, activeFrameDir);
+  }
+
+  function tryAlternatePath(frameIndex) {
+    for (const candidateDir of CANDIDATE_FRAME_DIRS) {
+      if (candidateDir !== activeFrameDir) {
+        const probe = new Image();
+        probe.crossOrigin = 'anonymous';
+        probe.onload = () => {
+          activeFrameDir = candidateDir;
+          isPathResolved = true;
+          images[frameIndex - 1] = probe;
+          loadedFlags[frameIndex - 1] = true;
+          loadedCount++;
+          processDownloadQueue();
+        };
+        probe.src = getFrameSrc(frameIndex, candidateDir);
+        return;
+      }
+    }
+    processDownloadQueue();
+  }
+
+  // Pre-flight probe to discover the fastest working path on Vercel or localhost
+  function probeWorkingPath(onReady) {
+    let candidateIndex = 0;
+
+    function testNextCandidate() {
+      if (candidateIndex >= CANDIDATE_FRAME_DIRS.length) {
+        activeFrameDir = 'background-animation/';
+        isPathResolved = true;
+        if (onReady) onReady();
+        return;
+      }
+
+      const testDir = CANDIDATE_FRAME_DIRS[candidateIndex];
+      const testImg = new Image();
+      testImg.crossOrigin = 'anonymous';
+
+      testImg.onload = () => {
+        activeFrameDir = testDir;
+        isPathResolved = true;
+        images[0] = testImg;
+        loadedFlags[0] = true;
+        loadedCount++;
+        renderCanvasFrame(1);
+        if (onReady) onReady();
+      };
+
+      testImg.onerror = () => {
+        candidateIndex++;
+        testNextCandidate();
+      };
+
+      testImg.src = `${testDir}${FRAME_PREFIX}001${FRAME_EXT}`;
+    }
+
+    testNextCandidate();
+  }
+
+  function prioritizeFramesNear(centerFrame) {
+    for (let offset = 0; offset <= 4; offset++) {
+      if (centerFrame + offset <= TOTAL_FRAMES) enqueueFrame(centerFrame + offset, true);
+      if (centerFrame - offset >= 1) enqueueFrame(centerFrame - offset, true);
+    }
+  }
+
+  function initFramePreloader() {
+    probeWorkingPath(() => {
+      // 1. Immediate priority: initial sequential frames (1..20)
+      for (let i = 1; i <= Math.min(20, TOTAL_FRAMES); i++) {
+        enqueueFrame(i, true);
+      }
+
+      // 2. Strided keyframe sampling across timeline (every 8 frames)
+      // Guarantees zero blank screens on any fast scrub on Vercel
+      for (let i = 21; i <= TOTAL_FRAMES; i += 8) {
+        enqueueFrame(i, false);
+      }
+
+      // 3. Staggered background worker to fill the remaining frames smoothly
+      setTimeout(() => {
+        for (let i = 21; i <= TOTAL_FRAMES; i++) {
+          if (!loadedFlags[i - 1]) {
+            enqueueFrame(i, false);
+          }
+        }
+      }, 350);
+    });
   }
 
   function resizeCanvas() {
@@ -133,27 +266,31 @@
     frameNum = Math.max(1, Math.min(TOTAL_FRAMES, frameNum));
     const img = images[frameNum - 1];
 
-    if (!img || !img.complete || img.naturalWidth === 0) {
-      // Find nearest loaded frame for zero flicker
-      let fallback = null;
-      for (let offset = 1; offset < 40; offset++) {
-        if (frameNum - offset >= 1 && images[frameNum - offset - 1]?.complete && images[frameNum - offset - 1]?.naturalWidth > 0) {
-          fallback = images[frameNum - offset - 1];
-          break;
-        }
-        if (frameNum + offset <= TOTAL_FRAMES && images[frameNum + offset - 1]?.complete && images[frameNum + offset - 1]?.naturalWidth > 0) {
-          fallback = images[frameNum + offset - 1];
-          break;
-        }
-      }
-      if (fallback) {
-        drawCover(fallback);
-      }
+    if (img && img.complete && img.naturalWidth > 0) {
+      drawCover(img);
+      lastDrawnFrame = frameNum;
+      hideInitialPoster();
       return;
     }
 
-    drawCover(img);
-    lastDrawnFrame = frameNum;
+    // Omnipresent Nearest-Frame Search across entire buffer
+    let fallback = null;
+    let minDistance = Infinity;
+
+    for (let i = 0; i < TOTAL_FRAMES; i++) {
+      if (images[i] && images[i].complete && images[i].naturalWidth > 0) {
+        const dist = Math.abs((i + 1) - frameNum);
+        if (dist < minDistance) {
+          minDistance = dist;
+          fallback = images[i];
+        }
+      }
+    }
+
+    if (fallback) {
+      drawCover(fallback);
+      hideInitialPoster();
+    }
   }
 
   function drawCover(img) {
@@ -193,6 +330,7 @@
     const progress = Math.min(1, Math.max(0, currentScroll / maxScroll));
 
     targetFrame = 1 + Math.floor(progress * (TOTAL_FRAMES - 1));
+    prioritizeFramesNear(targetFrame);
   }
 
   window.addEventListener('scroll', calculateScrollTarget, { passive: true });
